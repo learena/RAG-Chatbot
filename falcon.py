@@ -46,27 +46,26 @@ def split_doc(document, chunk_size, chunk_overlap):
 
 def embedding_storing(split, create_new_vs, existing_vector_store, new_vs_name):
     if create_new_vs is not None:
-        # Configura il tokenizer e imposta il padding
-        tokenizer = AutoTokenizer.from_pretrained("GroNLP/gpt2-small-italian-embeddings")
-        if tokenizer.pad_token is None:
-            tokenizer.pad_token = tokenizer.eos_token
-
-        # Crea embeddings usando il tokenizer configurato
+        # Inizializza gli embeddings
         instructor_embeddings = HuggingFaceEmbeddings(
             model_name="GroNLP/gpt2-small-italian-embeddings", 
             model_kwargs={'device': 'cpu'}
         )
 
-        # Implement embeddings
+        # Configura il tokenizer per il padding
+        if instructor_embeddings.client.tokenizer.pad_token is None:
+            instructor_embeddings.client.tokenizer.pad_token = instructor_embeddings.client.tokenizer.eos_token
+
+        # Implementa gli embeddings
         db = FAISS.from_documents(split, instructor_embeddings)
 
-        if create_new_vs:
-            # Save db
+        if create_new_vs == True:
+            # Salva il database
             print(f"Saving vector store at: ")
             db.save_local("vector store/" + new_vs_name)
             print("Vector store saved successfully.")
         else:
-            # Load existing db
+            # Carica il database esistente
             if not os.path.exists("vector store/" + existing_vector_store):
                 st.error(f"The specified vector store {existing_vector_store} does not exist.")
                 return
@@ -75,7 +74,7 @@ def embedding_storing(split, create_new_vs, existing_vector_store, new_vs_name):
                 instructor_embeddings,
                 allow_dangerous_deserialization=True
             )
-            # Merge two DBs and save
+            # Unisci i due database e salva
             load_db.merge_from(db)
             load_db.save_local("vector store/" + new_vs_name)
 
