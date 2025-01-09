@@ -55,28 +55,28 @@ def embedding_storing( split, create_new_vs, existing_vector_store, new_vs_name)
             instructor_embeddings.tokenizer.pad_token = instructor_embeddings.tokenizer.eos_token
 
         # Implement embeddings
-        db = FAISS.from_documents(split, instructor_embeddings)
+            db = FAISS.from_documents(split, instructor_embeddings)
 
-        if create_new_vs == True:
+            if create_new_vs == True:
                     # Save db
                     print(f"Saving vector store at: ")
                     db.save_local("vector store/" + new_vs_name)
                     print("Vector store saved successfully.")
-                else:
+            else:
                     # Load existing db
-                    if not os.path.exists("vector store/" + existing_vector_store):
-                        st.error(f"The specified vector store {existing_vector_store} does not exist.")
-                        return
-                    load_db = FAISS.load_local(
-                        "vector store/" + existing_vector_store,
-                        instructor_embeddings,
-                        allow_dangerous_deserialization=True
-                    )
+                if not os.path.exists("vector store/" + existing_vector_store):
+                    st.error(f"The specified vector store {existing_vector_store} does not exist.")
+                    return
+                load_db = FAISS.load_local(
+                    "vector store/" + existing_vector_store,
+                    instructor_embeddings,
+                    allow_dangerous_deserialization=True
+                )
                     # Merge two DBs and save
-                    load_db.merge_from(db)
-                    load_db.save_local("vector store/" + new_vs_name)
+                load_db.merge_from(db)
+                load_db.save_local("vector store/" + new_vs_name)
         
-                st.success("The document has been saved.")
+            st.success("The document has been saved.")
         
                 
         
