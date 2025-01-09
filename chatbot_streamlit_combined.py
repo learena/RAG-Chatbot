@@ -193,28 +193,38 @@ def display_document_embedding_page():
 
     if save_button:
         if document is not None:
+            # Aggregate content of all uploaded files
             combined_content = ""
             for file in document:
-                print(f"File caricato: {file.name}")
                 if file.name.endswith(".pdf"):
                     combined_content += falcon.read_pdf(file)
                 elif file.name.endswith(".txt"):
                     combined_content += falcon.read_txt(file)
                 else:
-                    print("Errore: Formato file non supportato.")
-        
-            print(f"Contenuto combinato: {combined_content}")
-        
-            split_chunks = falcon.split_doc(combined_content, chunk_size, chunk_overlap)
-            print(f"Chunk generati: {split_chunks}")
-        
-            try:
-                falcon.embedding_storing(split_chunks, create_new_vs, existing_vector_store, new_vs_name)
-                print("Vector store aggiornato o creato con successo.")
-            except Exception as e:
-                print(f"Errore durante la memorizzazione del vector store: {e}")
+                    st.error("Check if the uploaded file is .pdf or .txt")
+
+            # Split combined content into chunks
+            split = falcon.split_doc(combined_content, chunk_size, chunk_overlap)
+
+            # Check whether to create new vector store
+            create_new_vs = None
+            if existing_vector_store == "<New>" and new_vs_name != "":
+                create_new_vs = True
+            elif existing_vector_store != "<New>" and new_vs_name != "":
+                create_new_vs = False
+            else:
+                st.error("Check the 'Vector Store to Merge the Knowledge' and 'New Vector Store Name'")
+
+            # Embeddings and storing
+            falcon.embedding_storing(split, create_new_vs, existing_vector_store, new_vs_name)
+            print(f'"Document info":{combined_content}')    
+            print(f'"Splitted info":{split}')   
+
         else:
-            print("Nessun file caricato.")
+            st.warning("Please upload at least one file.")
+
+
+
 
 
 if __name__ == "__main__":
