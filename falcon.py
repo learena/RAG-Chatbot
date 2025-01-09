@@ -1,10 +1,7 @@
 import streamlit as st
 from langchain_community.document_loaders import TextLoader
-from transformers import AutoTokenizer
 from pypdf import PdfReader
 from langchain_community.llms import HuggingFaceHub
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_huggingface import HuggingFaceEndpoint
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceInstructEmbeddings
@@ -44,44 +41,36 @@ def split_doc(document, chunk_size, chunk_overlap):
     return split
 
 
-def embedding_storing(split, create_new_vs, existing_vector_store, new_vs_name):
+def embedding_storing( split, create_new_vs, existing_vector_store, new_vs_name):
     if create_new_vs is not None:
-        # Inizializza gli embeddings
-        instructor_embeddings = HuggingFaceEmbeddings(
-        model_name="dbmdz/bert-base-italian-uncased",
-        model_kwargs={'device': 'cpu'}
-        )
+        # Load embeddings instructor
+        #instructor_embeddings = HuggingFaceInstructEmbeddings(
+           # model_name='hkunlp/instructor-xl', model_kwargs={"device":"cpu"}
+       # )
+        #model_name="GroNLP/gpt2-small-italian-embeddings" this is for italian language embedding
+        instructor_embeddings =HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2", 
+                                           model_kwargs={'device': 'cpu'})
 
-        # Configura il tokenizer per il padding
-        if instructor_embeddings.client.tokenizer.pad_token is None:
-            instructor_embeddings.client.tokenizer.pad_token = instructor_embeddings.client.tokenizer.eos_token
-
-        # Implementa gli embeddings
+        # Implement embeddings
         db = FAISS.from_documents(split, instructor_embeddings)
 
         if create_new_vs == True:
-            # Salva il database
-            print(f"Saving vector store at: ")
+            # Save db
             db.save_local("vector store/" + new_vs_name)
-            print("Vector store saved successfully.")
         else:
-            # Carica il database esistente
-            if not os.path.exists("vector store/" + existing_vector_store):
-                st.error(f"The specified vector store {existing_vector_store} does not exist.")
-                return
+            # Load existing db
             load_db = FAISS.load_local(
                 "vector store/" + existing_vector_store,
                 instructor_embeddings,
                 allow_dangerous_deserialization=True
             )
-            # Unisci i due database e salva
+            # Merge two DBs and save
             load_db.merge_from(db)
             load_db.save_local("vector store/" + new_vs_name)
-
+            
+        #chatbot_streamlit_combined.main_place()
         st.success("The document has been saved.")
-
         
-                
         
 def prepare_rag_llm(
     token, vector_store_list, temperature, max_length
@@ -91,10 +80,8 @@ def prepare_rag_llm(
         #model_name='hkunlp/instructor-xl', model_kwargs={"device":"cpu"}
     #)
     #model_name="GroNLP/gpt2-small-italian-embeddings" this is for italian language embedding
-    instructor_embeddings = HuggingFaceEmbeddings(
-    model_name="dbmdz/bert-base-italian-uncased",
-    model_kwargs={'device': 'cpu'}
-    )
+    instructor_embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2", 
+                                           model_kwargs={'device': 'cpu'})
     # Load db
     loaded_db = FAISS.load_local(
         f"vector store/{vector_store_list}", instructor_embeddings, allow_dangerous_deserialization=True
