@@ -48,8 +48,8 @@ def embedding_storing(split, create_new_vs, existing_vector_store, new_vs_name):
     if create_new_vs is not None:
         # Inizializza gli embeddings
         instructor_embeddings = HuggingFaceEmbeddings(
-            model_name="GroNLP/gpt2-small-italian-embeddings", 
-            model_kwargs={'device': 'cpu'}
+        model_name="dbmdz/bert-base-italian-uncased",
+        model_kwargs={'device': 'cpu'}
         )
 
         # Configura il tokenizer per il padding
@@ -91,8 +91,10 @@ def prepare_rag_llm(
         #model_name='hkunlp/instructor-xl', model_kwargs={"device":"cpu"}
     #)
     #model_name="GroNLP/gpt2-small-italian-embeddings" this is for italian language embedding
-    instructor_embeddings = HuggingFaceEmbeddings(model_name="GroNLP/gpt2-small-italian-embeddings", 
-                                           model_kwargs={'device': 'cpu'})
+    instructor_embeddings = HuggingFaceEmbeddings(
+    model_name="dbmdz/bert-base-italian-uncased",
+    model_kwargs={'device': 'cpu'}
+    )
     # Load db
     loaded_db = FAISS.load_local(
         f"vector store/{vector_store_list}", instructor_embeddings, allow_dangerous_deserialization=True
