@@ -56,9 +56,14 @@ def embedding_storing( split, create_new_vs, existing_vector_store, new_vs_name)
 
         if create_new_vs == True:
             # Save db
-            db.save_local("vector store/" + new_vs_name)
+            print(f"Saving vector store at: {save_path}")
+            db.save_local(save_path)
+            print("Vector store saved successfully.")
         else:
             # Load existing db
+            if not os.path.exists("vector store/" + existing_vector_store):
+                st.error(f"The specified vector store {existing_vector_store} does not exist.")
+                return
             load_db = FAISS.load_local(
                 "vector store/" + existing_vector_store,
                 instructor_embeddings,
