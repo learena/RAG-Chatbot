@@ -1,5 +1,6 @@
 import streamlit as st
 from langchain_community.document_loaders import TextLoader
+from transformers import AutoTokenizer
 from pypdf import PdfReader
 from langchain_community.llms import HuggingFaceHub
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -43,40 +44,43 @@ def split_doc(document, chunk_size, chunk_overlap):
     return split
 
 
-def embedding_storing( split, create_new_vs, existing_vector_store, new_vs_name):
+def embedding_storing(split, create_new_vs, existing_vector_store, new_vs_name):
     if create_new_vs is not None:
-        # Load embeddings instructor
+        # Configura il tokenizer e imposta il padding
+        tokenizer = AutoTokenizer.from_pretrained("GroNLP/gpt2-small-italian-embeddings")
+        if tokenizer.pad_token is None:
+            tokenizer.pad_token = tokenizer.eos_token
+
+        # Crea embeddings usando il tokenizer configurato
         instructor_embeddings = HuggingFaceEmbeddings(
             model_name="GroNLP/gpt2-small-italian-embeddings", 
             model_kwargs={'device': 'cpu'}
         )
 
-    if instructor_embeddings.tokenizer.pad_token is None:
-            instructor_embeddings.tokenizer.pad_token = instructor_embeddings.tokenizer.eos_token
-
         # Implement embeddings
-            db = FAISS.from_documents(split, instructor_embeddings)
+        db = FAISS.from_documents(split, instructor_embeddings)
 
-            if create_new_vs == True:
-                    # Save db
-                    print(f"Saving vector store at: ")
-                    db.save_local("vector store/" + new_vs_name)
-                    print("Vector store saved successfully.")
-            else:
-                    # Load existing db
-                if not os.path.exists("vector store/" + existing_vector_store):
-                    st.error(f"The specified vector store {existing_vector_store} does not exist.")
-                    return
-                load_db = FAISS.load_local(
-                    "vector store/" + existing_vector_store,
-                    instructor_embeddings,
-                    allow_dangerous_deserialization=True
-                )
-                    # Merge two DBs and save
-                load_db.merge_from(db)
-                load_db.save_local("vector store/" + new_vs_name)
-        
-            st.success("The document has been saved.")
+        if create_new_vs:
+            # Save db
+            print(f"Saving vector store at: ")
+            db.save_local("vector store/" + new_vs_name)
+            print("Vector store saved successfully.")
+        else:
+            # Load existing db
+            if not os.path.exists("vector store/" + existing_vector_store):
+                st.error(f"The specified vector store {existing_vector_store} does not exist.")
+                return
+            load_db = FAISS.load_local(
+                "vector store/" + existing_vector_store,
+                instructor_embeddings,
+                allow_dangerous_deserialization=True
+            )
+            # Merge two DBs and save
+            load_db.merge_from(db)
+            load_db.save_local("vector store/" + new_vs_name)
+
+        st.success("The document has been saved.")
+
         
                 
         
