@@ -1,7 +1,7 @@
 langchain
 langchain_community
 faiss-cpu
-sentence-transformers==2.2.2
+sentence-transformers
 InstructorEmbedding
 pypdf
 streamlit
