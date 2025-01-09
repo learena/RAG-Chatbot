@@ -87,7 +87,7 @@ def prepare_rag_llm(
         #model_name='hkunlp/instructor-xl', model_kwargs={"device":"cpu"}
     #)
     #model_name="GroNLP/gpt2-small-italian-embeddings" this is for italian language embedding
-    instructor_embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2", 
+    instructor_embeddings = HuggingFaceEmbeddings(model_name="GroNLP/gpt2-small-italian-embeddings", 
                                            model_kwargs={'device': 'cpu'})
     # Load db
     loaded_db = FAISS.load_local(
