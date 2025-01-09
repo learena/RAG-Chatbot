@@ -69,7 +69,7 @@ def display_chatbot_page():
                 llm_model = st.text_input("LLM model", value="tiiuae/falcon-7b-instruct")
 
             with row_1[2]:
-                instruct_embeddings = st.text_input("Instruct Embeddings", value=""hkunlp/instructor-xl" ")
+                instruct_embeddings = st.text_input("Instruct Embeddings", value=""hkunlp/instructor-xl")
 
             row_2 = st.columns(3)
             with row_2[0]:
