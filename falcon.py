@@ -56,8 +56,8 @@ def embedding_storing( split, create_new_vs, existing_vector_store, new_vs_name)
 
         if create_new_vs == True:
             # Save db
-            print(f"Saving vector store at: {save_path}")
-            db.save_local(save_path)
+            print(f"Saving vector store at: ")
+            db.save_local("vector store/" + new_vs_name)
             print("Vector store saved successfully.")
         else:
             # Load existing db
