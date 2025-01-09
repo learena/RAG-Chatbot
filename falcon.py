@@ -50,7 +50,7 @@ def embedding_storing( split, create_new_vs, existing_vector_store, new_vs_name)
            # model_name='hkunlp/instructor-xl', model_kwargs={"device":"cpu"}
        # )
         #model_name="GroNLP/gpt2-small-italian-embeddings" this is for italian language embedding
-        instructor_embeddings =HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2", 
+        instructor_embeddings =HuggingFaceEmbeddings(model_name="GroNLP/gpt2-small-italian-embeddings", 
                                            model_kwargs={'device': 'cpu'})
 
         # Implement embeddings
